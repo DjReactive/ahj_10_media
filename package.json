@@ -1,5 +1,5 @@
 {
-  "name": "animations",
+  "name": "Media",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -48,12 +48,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DjReactive/ahj_9_anim.git"
+    "url": "git+https://github.com/DjReactive/ahj_10_media.git"
   },
   "bugs": {
-    "url": "https://github.com/DjReactive/ahj_9_anim/issues"
+    "url": "https://github.com/DjReactive/ahj_10_media/issues"
   },
-  "homepage": "https://github.com/DjReactive/ahj_9_anim#readme",
+  "homepage": "https://github.com/DjReactive/ahj_10_media#readme",
   "dependencies": {
     "core-js": "^3.20.3"
   }
