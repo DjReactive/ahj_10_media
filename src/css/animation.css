@@ -1,0 +1,18 @@
+.error-animation {
+  animation-name: showError;
+  animation-duration: 0.4s;
+  animation-direction: normal;
+}
+
+@keyframes showError {
+  0% {
+    top: -100px;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+  }
+}

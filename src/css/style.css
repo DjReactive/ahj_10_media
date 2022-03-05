@@ -1,0 +1,149 @@
+body {
+  background-color: #999;
+  font-family: Arial;
+  margin: 0;
+}
+.chat {
+  position: relative;
+  background-color: #eee;
+  max-width: 600px;
+  min-width: 500px;
+  height: calc(100vh);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.error {
+  position: absolute;
+  background: #910;
+  color: white;
+  width: 100%;
+  top: 0;
+  padding: 20px 10px;
+  box-sizing: border-box;
+}
+.send {
+  border-style: none;
+  border: 1px solid #444;
+  background: #aaa;
+  border-radius: 50%;
+  font-size: 16px;
+  width: 35px;
+  height: 35px;
+  margin:0 3px;
+  opacity: 0.8;
+}
+.send:hover {
+  cursor: pointer;
+  color: #fff;
+  background: #367;
+  opacity: 1;
+}
+.feed-message {
+  padding: 10px;
+  background: #ccc;
+  border-radius: 10px;
+  margin: 5px;
+}
+.feed-message__text {
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+.feed-message__content {
+  width: 100%;
+}
+.feed-message__created {
+  min-width: 110px;
+  font-size: 12px;
+  color: #999;
+}
+.feed-message__location {
+  color: #444;
+  font-size: 12px;
+}
+.chat__feed {
+  overflow-y: scroll;
+  height: calc(100vh - 62px);
+}
+.chat__control {
+  height: 60px;
+  border-top: 1px solid #999;
+  position: relative;
+}
+.chat__buttons, .media__buttons {
+  display: flex;
+  position: absolute;
+  z-index: 99;
+  right: 10px;
+}
+textarea {
+  box-sizing: border-box;
+  border-style: none;
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  outline: 0;
+}
+.button {
+  padding: 5px 10px;
+  border-style: none;
+  background: #fff;
+  border: 2px solid rgba(1,10,10,0.2);
+  border-radius: 5px;
+  color: #444;
+}
+.button:hover {
+  cursor: pointer;
+  border: 2px solid #444;
+}
+.modal {
+  display: none;
+  position: absolute;
+  background: #ccc;
+  border: 1px solid #999;
+  padding: 15px;
+  color: #444;
+  width: 400px;
+  z-index: 100;
+}
+.modal__content {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  padding: 10px 0;
+}
+.modal__title {
+  font-size: 16px;
+  color: #000;
+}
+.modal__control {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+.modal__active {
+  display: flex;
+  flex-direction: column;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+.timer {
+  line-height: 2;
+  font-weight: bold;
+}
+.audio {
+  width: 100%;
+  display: block;
+  height: 50px;
+}
+.video {
+  width: 100%;
+  display: block;
+  height: 250px;
+}
+.hidden {
+  display: none;
+  color: red;
+}
