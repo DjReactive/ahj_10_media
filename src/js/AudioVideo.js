@@ -23,15 +23,20 @@ export default class AudioVideo {
 
   start(type) {
     this.type = type;
-    (async () => {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: (type === 'video'),
-      });
-      this.recorder = new MediaRecorder(this.stream);
-      this.chunks = [];
-      this.initEvents();
-      this.recorder.start();
+    return (async () => {
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: (type === 'video'),
+        });
+        this.recorder = new MediaRecorder(this.stream);
+        this.chunks = [];
+        this.initEvents();
+        this.recorder.start();
+      } catch (err) {
+        return { error: true, message: err };
+      }
+      return { error: false };
     })();
   }
 

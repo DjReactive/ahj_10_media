@@ -12,6 +12,7 @@ export default class Feed {
     this.counter = 0;
     this.timer = 0;
     this.timerId = null;
+    this.blockButtons = false;
     this.mediaCtrl = new AudioVideo();
     this.chat = document.getElementById('chat');
     this.feed = this.chat.querySelector('.chat__feed');
@@ -26,20 +27,20 @@ export default class Feed {
     const bAudio = this.createButton({ id: 'send-audio', text: '\u{1F3A4}' });
     const bVideo = this.createButton({ id: 'send-video', text: '\u{1F4F9}' });
     const bText = this.createButton({ id: 'send-message', text: '\u{27A4}' });
-    const mediaOk = this.createButton({ id: 'accept-media', text: 'OK' }, this.mCtrl);
+    const mediaOk = this.createButton({ id: 'accept-media', text: '\u{2713}' }, this.mCtrl);
     const timer = AppFunc.newElement('div', { class: 'timer' });
     this.mCtrl.appendChild(timer);
-    const mediaStop = this.createButton({ id: 'cancel-media', text: 'ST' }, this.mCtrl);
+    const mediaStop = this.createButton({ id: 'cancel-media', text: '\u{2717}' }, this.mCtrl);
     this.mCtrl.classList.add('hidden');
 
     // events
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' || this.txtArea !== document.activeElement) return;
-      this.preSending('text');
+      this.preSending(bText, 'text');
     });
-    bText.addEventListener('click', () => this.preSending('text'));
-    bAudio.addEventListener('click', () => this.preSending('audio'));
-    bVideo.addEventListener('click', () => this.preSending('video'));
+    bText.addEventListener('click', () => this.preSending(bText, 'text'));
+    bAudio.addEventListener('click', () => this.preSending(bAudio, 'audio'));
+    bVideo.addEventListener('click', () => this.preSending(bVideo, 'video'));
     // accept recording
     mediaOk.addEventListener('click', () => {
       this.switchControl();
@@ -56,10 +57,11 @@ export default class Feed {
       clearInterval(this.timerId);
       this.mediaCtrl.stop();
     });
-
     this.txtArea.focus();
+
     this.setLocation = this.setLocation.bind(this);
-    Geo.getLocation(this.setLocation, Geo.error);
+    this.showError = this.showError.bind(this);
+    Geo.getLocation(this.setLocation, this.showError);
     this.bCtrl.style.top = `${String(Number(this.txtArea.offsetHeight) / 2
     - Number(this.bCtrl.offsetHeight) / 2)}px`;
     this.mCtrl.style.top = `${String(Number(this.txtArea.offsetHeight) / 2
@@ -80,10 +82,26 @@ export default class Feed {
     this.mCtrl.classList.toggle('hidden');
   }
 
-  preSending(sendtype) {
+  preSending(button, sendtype) {
+    if (this.blockButtons) return;
+
+    // Easy Validator
+    if (sendtype === 'text' && this.txtArea.value.length < 1) {
+      this.showError('Вы отправляете пустое сообщение');
+      return;
+    }
+
     this.send = this.send.bind(this);
+    this.addLoader(button, 24);
     if (!Geo.isEnable) this.getModal(sendtype, this.send);
-    else this.send({ type: sendtype, location: this.coords });
+    else {
+      new Promise((resolve) => {
+        Geo.getLocation((data) => resolve(data));
+      }).then((value) => {
+        this.setLocation(value);
+        this.send({ type: sendtype, location: this.coords });
+      });
+    }
   }
 
   send(data) {
@@ -92,6 +110,7 @@ export default class Feed {
     this.post.location = AppFunc.getFormatLocation(data.location);
     this.post.type = data.type;
     this.post.created = Date.now();
+    this.removeLoader();
     switch (data.type) {
       case 'text':
         this.post.content = this.txtArea.value;
@@ -110,22 +129,24 @@ export default class Feed {
   mediaContent(type) {
     this.switchControl();
     const timer = this.mCtrl.querySelector('.timer');
-    timer.textContent = '00:00';
-
-    this.timer = 0;
-    this.mediaCtrl.start(type);
-    this.timerId = setInterval(() => {
-      this.timer += 1;
-      timer.textContent = AppFunc.formatTime(this.timer);
-    }, 1000);
+    new Promise((resolve) => resolve(this.mediaCtrl.start(type)))
+      .then((err) => {
+        if (!err.error) {
+          timer.textContent = '00:00';
+          this.timer = 0;
+          this.timerId = setInterval(() => {
+            this.timer += 1;
+            timer.textContent = AppFunc.formatTime(this.timer);
+          }, 1000);
+        } else {
+          this.default();
+          this.switchControl();
+          this.showError(err.message);
+        }
+      });
   }
 
   addPost(post = this.post) {
-    // Easy Validator
-    if (post.type === 'text' && post.content.length < 1) {
-      this.showError('Вы отправляете пустое сообщение');
-      return;
-    }
     const msg = document.createElement('div');
     msg.classList.add('feed-message');
     msg.innerHTML = `<div class="feed-message__text">
@@ -137,15 +158,19 @@ export default class Feed {
     this.feed.insertAdjacentElement('afterbegin', msg);
     const content = msg.querySelector('.feed-message__content');
     content.innerHTML = post.content;
-
-    // reset and scrolling
-    this.feed.scrollBottom = this.feed.scrollHeight;
-    this.txtArea.value = '';
-    this.txtArea.focus();
+    this.default();
   }
 
   getId() {
     this.counter += 1; return this.counter;
+  }
+
+  default() {
+    // reset and scrolling
+    this.txtArea.removeAttribute('disabled');
+    this.feed.scrollBottom = this.feed.scrollHeight;
+    this.txtArea.value = '';
+    this.txtArea.focus();
   }
 
   // callback for accept coords
@@ -189,6 +214,8 @@ export default class Feed {
   }
 
   closeModal() {
+    this.removeLoader();
+    this.txtArea.removeAttribute('disabled');
     this.modal.classList.remove('modal__active');
     this.modal.innerHTML = '';
   }
@@ -208,6 +235,35 @@ export default class Feed {
         e.target.remove();
       }, 2000);
     });
+  }
+
+  addLoader(button, size = null) {
+    this.removeLoader();
+    this.blockButtons = true;
+    this.txtArea.setAttribute('disabled', true);
+    const img = document.createElement('img');
+    img.classList.add('loader');
+    img.setAttribute('src', 'images/tail-spin.svg');
+    if (size) img.style.width = `${size}px`;
+    this.loader = {
+      element: img,
+      replacement: button,
+      text: button.textContent,
+    };
+    button.textContent = '';
+    button.appendChild(img);
+  }
+
+  isLoader() {
+    return !!(this.loader);
+  }
+
+  removeLoader() {
+    if (this.isLoader()) {
+      this.blockButtons = false;
+      this.loader.replacement.textContent = this.loader.text;
+      this.loader.element.remove(); this.loader = null;
+    }
   }
 
   setLocation(pos) {

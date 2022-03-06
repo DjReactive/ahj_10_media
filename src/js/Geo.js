@@ -3,7 +3,11 @@ export default class Geo {
 
   static isEnable = true;
 
-  static getLocation(success, error) {
-    Geo.navi.getCurrentPosition(success, error);
+  static getLocation(success) {
+    Geo.navi.getCurrentPosition(success, Geo.error);
+  }
+
+  static error(err) {
+    if (err) Geo.isEnable = false;
   }
 }
